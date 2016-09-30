@@ -19,10 +19,10 @@ stopwords = stopwords.union({
 
 def my_tokenizer(s):
 	s = s.lower() 
-	tokens = nltk.tokenize.word_token(s)
+	tokens = nltk.tokenize.word_tokenize(s)
 	tokens = [t for t in tokens if len(t) > 2]
-	tokens = [wodnet_lemmatze(t) for t in tokens]
-	tokens = [t for t in tokesn if t not in stopwords]
+	tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]
+	tokens = [t for t in tokens if t not in stopwords]
 	tokens = [t for t in tokens if not any(c.isdigit() for c in t)]
 	return tokens
 
@@ -35,8 +35,13 @@ for title in titles:
 	try:
 		title = title.encode('ascii', 'ignore')
 		all_titles.append(title)
-		tokens = my_tokens(zer(title))
-		all_tokens.append(token)
+		tokens = my_tokenizer(title)
+		all_tokens.append(tokens)
+		for token in tokens:
+			if token not in word_index_map:
+				word_index_map[token] = current_index
+				current_index += 1
+				index_word_map.append(token)
 	except:
 		pass
 
@@ -52,11 +57,13 @@ D = len(word_index_map)
 X = np.zeros((D,N))
 i = 0
 for tokens in all_tokens:
-	x[:,i] = tokens_to_vector(tokens)
+	X[:,i] = tokens_to_vector(tokens)
 	i += 1
+print(np.shape(X))
 
 svd = TruncatedSVD()
 Z = svd.fit_transform(X)
+print(np.shape(Z))
 
 plt.scatter(Z[:,0], Z[:,1])
 for i in xrange(D):
